@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busta Paga — Net Salary Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="grain"></div>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-mark">JH</span>
+                <div class="brand-text">
+                    <span class="brand-name">Jet HR</span>
+                    <span class="brand-sub">Salary Projection Tool</span>
+                </div>
+            </div>
+            <div class="header-meta">
+                <span class="meta-pill">Milan · 2026 rates</span>
+                <span class="meta-pill">Permanent · Full-time</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-inner">
+                <p class="eyebrow">Gross → Net, itemized</p>
+                <h1>Every euro of your salary,<br>accounted for.</h1>
+                <p class="hero-lede">Enter a gross annual salary (RAL). We'll run it through Italy's 2026 tax code —
+                    INPS, IRPEF brackets, regional and municipal surtax, the cuneo fiscale relief — and show you exactly
+                    where it goes, payslip by payslip.</p>
+            </div>
+        </section>
+
+        <!-- CALCULATOR -->
+        <section class="calculator">
+            <div class="calc-grid">
+
+                <!-- INPUT PANEL -->
+                <div class="input-panel">
+                    <div class="panel-label">
+                        <span class="panel-number">Input</span>
+                        <h2>Your gross salary</h2>
+                    </div>
+
+                    <label class="field-label" for="ralInput">Annual RAL (€)</label>
+                    <div class="input-wrap">
+                        <span class="currency-sign">€</span>
+                        <input type="text" inputmode="numeric" id="ralInput" placeholder="45,000" autocomplete="off">
+                    </div>
+                    <input type="range" id="ralSlider" min="18000" max="150000" step="500" value="45000"
+                        class="ral-slider">
+                    <div class="slider-ticks">
+                        <span>€18k</span>
+                        <span>€150k</span>
+                    </div>
+
+                    <button id="calculateBtn" class="calc-btn">
+                        <span>Calculate net salary</span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+
+                    <div class="assumptions-box">
+                        <button class="assumptions-toggle" id="assumptionsToggle">
+                            <span>Assumptions used in this model</span>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="chevron">
+                                <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.3"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                        <ul class="assumptions-list" id="assumptionsList">
+                            <li>Permanent, full-time employee — corporate / tech sector</li>
+                            <li>Entered the workforce after 1996 (INPS contributive cap applies)</li>
+                            <li>Resident and working in Milan, Lombardia</li>
+                            <li>Paid over 13 monthly installments (no 14th — standard for tech)</li>
+                            <li>No CCNL — so no supplementary health fund deduction</li>
+                            <li>Full 365-day tax year, no special exemptions or bonuses</li>
+                            <li>Not first year of Italian residency (regional tax applies)</li>
+                            <li>December figures exclude year-end conguaglio adjustment</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- OUTPUT PANEL -->
+                <div class="output-panel" id="outputPanel">
+
+                    <div class="empty-state" id="emptyState">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <rect x="8" y="4" width="24" height="32" rx="2" stroke="currentColor" stroke-width="1.4" />
+                            <path d="M13 12H27M13 18H27M13 24H20" stroke="currentColor" stroke-width="1.4"
+                                stroke-linecap="round" />
+                        </svg>
+                        <p>Your itemized breakdown will appear here.</p>
+                    </div>
+
+                    <div class="results" id="results">
+
+                        <!-- Headline numbers -->
+                        <div class="headline-row">
+                            <div class="headline-card net">
+                                <span class="headline-label">Net annual income</span>
+                                <span class="headline-value" id="netAnnual">€0</span>
+                                <span class="headline-sub" id="netPercent">— of gross</span>
+                            </div>
+                            <div class="headline-card deductions">
+                                <span class="headline-label">Total deducted / year</span>
+                                <span class="headline-value" id="totalDeductions">€0</span>
+                                <span class="headline-sub" id="effectiveRate">— effective rate</span>
+                            </div>
+                        </div>
+
+                        <!-- Salary erosion bar — signature element -->
+                        <div class="erosion-section">
+                            <div class="erosion-header">
+                                <h3>Where your gross salary goes</h3>
+                                <p>Each block is subtracted from your RAL, top to bottom. Hover any segment for the rule
+                                    behind it.</p>
+                            </div>
+                            <div class="erosion-bar-wrap">
+                                <div class="erosion-bar" id="erosionBar"></div>
+                                <div class="erosion-scale">
+                                    <span id="scaleTop">€0</span>
+                                    <span id="scaleBottom">€0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Line items table -->
+                        <div class="lineitems-section">
+                            <h3>Deductions, itemized</h3>
+                            <div class="lineitems-table" id="lineItemsTable"></div>
+                        </div>
+
+                        <!-- Monthly breakdown -->
+                        <div class="monthly-section">
+                            <div class="monthly-header">
+                                <h3>13 payslips, not 12</h3>
+                                <p>Italian salaries are paid over 13 installments. But local taxes stop after month 11,
+                                    and the 13th payslip carries no tax credits at all — so your take-home actually
+                                    changes shape across the year.</p>
+                            </div>
+
+                            <div class="payslip-strip" id="payslipStrip"></div>
+
+                            <div class="monthly-cards" id="monthlyCards"></div>
+                        </div>
+
+                        <!-- Reconciliation -->
+                        <div class="reconciliation" id="reconciliation"></div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <footer class="site-footer">
+            <p>Built as a working prototype of Italy's payroll logic — INPS, IRPEF, regional &amp; municipal surtax,
+                cuneo fiscale. Simplified for a single standard case: permanent, full-time, Milan-based, post-1996
+                entrant, no CCNL.</p>
+        </footer>
+
+    </main>
+
+    <script src="calculator.js"></script>
+</body>
+
+</html>
