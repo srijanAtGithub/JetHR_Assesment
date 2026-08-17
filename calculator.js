@@ -139,9 +139,84 @@ function render(res) {
 
     renderErosionBar(res);
     renderLineItems(res);
+    renderBenefits(res);
     renderPayslipStrip(res);
     renderMonthlyCards(res);
     renderReconciliation(res);
+}
+
+function renderBenefits(res) {
+    const grid = document.getElementById('benefitsGrid');
+    const totalEl = document.getElementById('benefitsTotal');
+    grid.innerHTML = '';
+
+    const benefits = [];
+
+    // Standard employee tax credit (Art. 13) — always present for eligible incomes
+    if (res.standardCredit > 0) {
+        benefits.push({
+            icon: 'credit',
+            name: 'Standard Employee Tax Credit',
+            subtitle: 'Detrazioni da lavoro dipendente — Art. 13 TUIR',
+            amount: res.standardCredit,
+            detail: `Automatically applied against your gross IRPEF because you're a standard employee. Phases out as taxable income rises toward €50,000.`
+        });
+    }
+
+    // Cuneo fiscale — either a tax-free cash bonus, or an additional credit, never both
+    if (res.taxFreeBonus > 0) {
+        benefits.push({
+            icon: 'bonus',
+            name: 'Cuneo Fiscale — Tax-Free Cash Bonus',
+            subtitle: 'Paid directly into your salary, not a deduction offset',
+            amount: res.taxFreeBonus,
+            detail: `Your taxable income is under €20,000, so this relief is paid out as tax-free cash added straight to your net pay each month, rather than reducing tax owed.`,
+            highlight: true
+        });
+    } else if (res.additionalCredit > 0) {
+        benefits.push({
+            icon: 'credit',
+            name: 'Cuneo Fiscale — Additional Tax Credit',
+            subtitle: 'Extra relief on top of the standard credit',
+            amount: res.additionalCredit,
+            detail: `Taxable income between €20,000–€40,000 qualifies for this additional credit, which further reduces the IRPEF you owe.`
+        });
+    }
+
+    const totalBenefit = res.standardCredit + res.additionalCredit + res.taxFreeBonus;
+
+    if (benefits.length === 0) {
+        grid.innerHTML = `<div class="benefit-empty">No tax credits or cuneo fiscale relief apply at this income level — taxable income exceeds the €50,000 threshold for both.</div>`;
+        totalEl.innerHTML = '';
+        return;
+    }
+
+    benefits.forEach(b => {
+        const card = document.createElement('div');
+        card.className = `benefit-card${b.highlight ? ' highlight' : ''}`;
+        card.innerHTML = `
+      <div class="benefit-card-top">
+        <span class="benefit-icon">${benefitIcon(b.icon)}</span>
+        <span class="benefit-amount">+${fmt2(b.amount)}</span>
+      </div>
+      <div class="benefit-name">${b.name}</div>
+      <div class="benefit-subtitle">${b.subtitle}</div>
+      <div class="benefit-detail">${b.detail}</div>
+    `;
+        grid.appendChild(card);
+    });
+
+    totalEl.innerHTML = `
+    <span class="benefits-total-label">Total tax benefit this year</span>
+    <span class="benefits-total-value">${fmt2(totalBenefit)}</span>
+  `;
+}
+
+function benefitIcon(type) {
+    if (type === 'bonus') {
+        return `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M9 5.5V12.5M6.75 7.25C6.75 6.28 7.68 5.5 9 5.5C10.32 5.5 11.25 6.28 11.25 7.25C11.25 8.9 9 8.7 9 10.35C9 11.32 9.93 12.1 9 12.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+    }
+    return `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 5.5C3 4.67 3.67 4 4.5 4H13.5C14.33 4 15 4.67 15 5.5V12.5C15 13.33 14.33 14 13.5 14H4.5C3.67 14 3 13.33 3 12.5V5.5Z" stroke="currentColor" stroke-width="1.4"/><path d="M3 7.5H15" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 10.5H8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
 }
 
 function renderErosionBar(res) {
