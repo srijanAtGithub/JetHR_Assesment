@@ -199,6 +199,24 @@
 
     </main>
 
+    <!-- FORMULA INFO MODAL -->
+    <div class="formula-overlay" id="formulaOverlay">
+        <div class="formula-modal" id="formulaModal">
+            <button class="formula-close" id="formulaClose" aria-label="Close">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+            </button>
+            <span class="formula-tag" id="formulaTag">Formula</span>
+            <h3 id="formulaTitle"></h3>
+            <div class="formula-box">
+                <span class="formula-box-label">General formula</span>
+                <code id="formulaExpr"></code>
+            </div>
+            <p id="formulaExplain"></p>
+        </div>
+    </div>
+
     <script src="calculator.js"></script>
 </body>
 

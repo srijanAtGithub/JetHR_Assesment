@@ -8,6 +8,75 @@ const fmt = (n, decimals = 0) =>
 
 const fmt2 = (n) => fmt(n, 2);
 
+/* ============================================
+   GENERIC FORMULA REFERENCE
+   Not tied to any specific gross salary — this is
+   the standard 2026 rule each figure is based on.
+   ============================================ */
+
+const FORMULA_INFO = {
+    inps: {
+        tag: 'Deduction',
+        title: 'INPS — Social Security Contribution',
+        formula: 'INPS = min(RAL, €122,295) × 9.19%',
+        explain: 'Employees pay 9.19% of their gross annual salary into mandatory social security (pension fund). For employees who started contributing after 1996, this only applies up to a yearly contribution cap — currently €122,295 — above which no further INPS is due.'
+    },
+    irpef: {
+        tag: 'Deduction',
+        title: 'IRPEF — National Income Tax',
+        formula: 'Up to €28,000 → 23%\n€28,000–€50,000 → 33%\nAbove €50,000 → 43%\n(each rate applies only to the slice of income in that band)',
+        explain: 'IRPEF is Italy\'s progressive national income tax, applied to taxable income (gross salary minus INPS). It works in brackets: income is split into bands, and each band is taxed at its own rate — not the whole income at the top rate. The result (gross IRPEF) is then reduced by any tax credits you qualify for.'
+    },
+    standardCredit: {
+        tag: 'Tax credit',
+        title: 'Standard Employee Tax Credit (Art. 13 TUIR)',
+        formula: 'Taxable income ≤ €15,000 → €1,955 flat\n€15,000–€28,000 → €1,910 + 1,190 × (28,000 − income) / 13,000\n€28,000–€50,000 → €1,910 × (50,000 − income) / 22,000\n> €50,000 → €0\n(+€65 extra if income is between €25,000 and €35,000)',
+        explain: 'Every employee gets an automatic "detrazione da lavoro dipendente" that directly reduces the IRPEF owed. It\'s largest at low incomes and phases down smoothly to zero as taxable income approaches €50,000, since the relief is meant to support lower and middle incomes most.'
+    },
+    cuneoBonus: {
+        tag: 'Tax-free bonus',
+        title: 'Cuneo Fiscale — Tax-Free Cash Bonus',
+        formula: 'Income ≤ €8,500 → income × 7.1%\n€8,500–€15,000 → income × 5.3%\n€15,000–€20,000 → income × 4.8%',
+        explain: 'For taxable incomes up to €20,000, the "cuneo fiscale" relief is paid out as tax-free cash added straight to net pay, rather than as a credit against tax owed. It\'s designed to boost take-home pay directly for lower earners.'
+    },
+    cuneoCredit: {
+        tag: 'Tax credit',
+        title: 'Cuneo Fiscale — Additional Tax Credit',
+        formula: '€20,000–€32,000 → €1,000 flat\n€32,000–€40,000 → 1,000 × (40,000 − income) / 8,000\n> €40,000 → €0',
+        explain: 'For taxable incomes between €20,000 and €40,000, the cuneo fiscale relief instead takes the form of an extra credit that further reduces IRPEF owed, on top of the standard employee credit. It phases out completely above €40,000.'
+    },
+    regional: {
+        tag: 'Deduction',
+        title: 'Addizionale Regionale (Lombardia)',
+        formula: 'Regional tax = Taxable income × regional rate\n(rate rises with income, set by each Region)',
+        explain: 'On top of national IRPEF, each Region adds its own surtax on taxable income, with rates that vary by income bracket and are set independently by each Region. This model uses Lombardia\'s published bracket rates. It\'s withheld over 11 monthly installments (Jan–Nov), not 13.'
+    },
+    municipal: {
+        tag: 'Deduction',
+        title: 'Addizionale Comunale (Milan)',
+        formula: 'Municipal tax = Taxable income × 0.8%\n(only if taxable income > €23,000; otherwise €0)',
+        explain: 'Each municipality can also levy its own surtax on taxable income. Milan applies a flat 0.8% rate, but exempts anyone whose taxable income is at or below €23,000. Like the regional tax, it\'s withheld over 11 installments (Jan–Nov).'
+    }
+};
+
+function openFormulaInfo(key) {
+    const info = FORMULA_INFO[key];
+    if (!info) return;
+    document.getElementById('formulaTag').textContent = info.tag;
+    document.getElementById('formulaTitle').textContent = info.title;
+    document.getElementById('formulaExpr').textContent = info.formula;
+    document.getElementById('formulaExplain').textContent = info.explain;
+    document.getElementById('formulaOverlay').classList.add('visible');
+}
+
+function closeFormulaInfo() {
+    document.getElementById('formulaOverlay').classList.remove('visible');
+}
+
+function formulaHintSpan() {
+    return '<span class="formula-hint">i</span>';
+}
+
 function calculate(RAL) {
     // ---- Step 1: Monthly Gross ----
     const monthlyGross = RAL / 13;
@@ -163,7 +232,8 @@ function renderBenefits(res) {
             name: 'Standard Employee Tax Credit',
             subtitle: 'Detrazioni da lavoro dipendente — Art. 13 TUIR',
             amount: res.standardCredit,
-            detail: `Automatically applied against your gross IRPEF because you're a standard employee. Phases out as taxable income rises toward €50,000.`
+            detail: `Automatically applied against your gross IRPEF because you're a standard employee. Phases out as taxable income rises toward €50,000.`,
+            key: 'standardCredit'
         });
     }
 
@@ -175,7 +245,8 @@ function renderBenefits(res) {
             subtitle: 'Paid directly into your salary, not a deduction offset',
             amount: res.taxFreeBonus,
             detail: `Your taxable income is under €20,000, so this relief is paid out as tax-free cash added straight to your net pay each month, rather than reducing tax owed.`,
-            highlight: true
+            highlight: true,
+            key: 'cuneoBonus'
         });
     } else if (res.additionalCredit > 0) {
         benefits.push({
@@ -183,7 +254,8 @@ function renderBenefits(res) {
             name: 'Cuneo Fiscale — Additional Tax Credit',
             subtitle: 'Extra relief on top of the standard credit',
             amount: res.additionalCredit,
-            detail: `Taxable income between €20,000–€40,000 qualifies for this additional credit, which further reduces the IRPEF you owe.`
+            detail: `Taxable income between €20,000–€40,000 qualifies for this additional credit, which further reduces the IRPEF you owe.`,
+            key: 'cuneoCredit'
         });
     }
 
@@ -203,11 +275,18 @@ function renderBenefits(res) {
         <span class="benefit-icon">${benefitIcon(b.icon)}</span>
         <span class="benefit-amount">+${fmt2(b.amount)}</span>
       </div>
-      <div class="benefit-name">${b.name}</div>
+      <div class="benefit-name" data-formula-key="${b.key}" tabindex="0" role="button" aria-haspopup="dialog">${b.name}${formulaHintSpan()}</div>
       <div class="benefit-subtitle">${b.subtitle}</div>
       <div class="benefit-detail">${b.detail}</div>
     `;
         grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('[data-formula-key]').forEach(el => {
+        el.addEventListener('click', () => openFormulaInfo(el.dataset.formulaKey));
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFormulaInfo(el.dataset.formulaKey); }
+        });
     });
 
     totalEl.innerHTML = `
@@ -231,17 +310,20 @@ function renderErosionBar(res) {
         {
             label: 'INPS', amount: res.inps, color: '#8991A0',
             title: 'INPS — Social Security',
-            detail: `9.19% of RAL, capped at €122,295. ${res.RAL > 122295 ? 'Your salary exceeds the cap, so INPS is fixed at the maximum.' : 'Applied directly to your full RAL.'}`
+            detail: `9.19% of RAL, capped at €122,295. ${res.RAL > 122295 ? 'Your salary exceeds the cap, so INPS is fixed at the maximum.' : 'Applied directly to your full RAL.'}`,
+            key: 'inps'
         },
         {
             label: 'Net IRPEF', amount: res.netIrpef, color: 'var(--rust)',
             title: 'IRPEF — National Income Tax',
-            detail: `Progressive tax (23% / 33% / 43%) on taxable income, minus your Art. 13 credit (${fmt(res.standardCredit)})${res.additionalCredit > 0 ? ` and cuneo fiscale credit (${fmt(res.additionalCredit)})` : ''}.`
+            detail: `Progressive tax (23% / 33% / 43%) on taxable income, minus your Art. 13 credit (${fmt(res.standardCredit)})${res.additionalCredit > 0 ? ` and cuneo fiscale credit (${fmt(res.additionalCredit)})` : ''}.`,
+            key: 'irpef'
         },
         {
             label: 'Regional', amount: res.regionalTax, color: '#C9836F',
             title: 'Addizionale Regionale — Lombardia',
-            detail: `${(res.regionalRate * 100).toFixed(2)}% of taxable income. Paid over 11 monthly installments (Jan–Nov).`
+            detail: `${(res.regionalRate * 100).toFixed(2)}% of taxable income. Paid over 11 monthly installments (Jan–Nov).`,
+            key: 'regional'
         },
     ];
 
@@ -249,14 +331,16 @@ function renderErosionBar(res) {
         segments.push({
             label: 'Municipal', amount: res.municipalTax, color: '#D9A38C',
             title: 'Addizionale Comunale — Milan',
-            detail: `Flat 0.8% of taxable income, since it exceeds the €23,000 exemption threshold. Paid over 11 installments.`
+            detail: `Flat 0.8% of taxable income, since it exceeds the €23,000 exemption threshold. Paid over 11 installments.`,
+            key: 'municipal'
         });
     }
 
     segments.push({
         label: 'Net pay', amount: res.netAnnual, color: 'var(--sage)',
         title: 'What you keep',
-        detail: `Your final net annual income${res.taxFreeBonus > 0 ? `, including the tax-free cuneo fiscale bonus of ${fmt(res.taxFreeBonus)}` : ''}.`
+        detail: `Your final net annual income${res.taxFreeBonus > 0 ? `, including the tax-free cuneo fiscale bonus of ${fmt(res.taxFreeBonus)}` : ''}.`,
+        key: null
     });
 
     segments.forEach(seg => {
@@ -265,13 +349,16 @@ function renderErosionBar(res) {
         el.className = 'erosion-segment';
         el.style.width = `${pct}%`;
         el.style.background = seg.color;
+        if (seg.key) el.dataset.formulaKey = seg.key;
         el.innerHTML = `
       <span class="seg-label">${pct > 6 ? seg.label : ''}</span>
       <div class="erosion-tooltip">
         <span class="tt-title">${seg.title}</span>
         ${seg.detail}<br><span class="tt-amount">${fmt2(seg.amount)}</span>
+        ${seg.key ? '<br><span class="tt-tap">Tap for the formula →</span>' : ''}
       </div>
     `;
+        if (seg.key) el.addEventListener('click', () => openFormulaInfo(seg.key));
         bar.appendChild(el);
     });
 }
@@ -284,17 +371,20 @@ function renderLineItems(res) {
         {
             color: '#8991A0', name: 'INPS — Social Security Contribution', amount: res.inps,
             detail: `9.19% of ${res.RAL > 122295 ? 'the €122,295 contributive cap' : 'your RAL'}.`,
-            formula: res.RAL > 122295 ? '€122,295 × 9.19%' : `${fmt(res.RAL)} × 9.19%`
+            formula: res.RAL > 122295 ? '€122,295 × 9.19%' : `${fmt(res.RAL)} × 9.19%`,
+            key: 'inps'
         },
         {
             color: 'var(--rust)', name: 'IRPEF — National Income Tax (Net)', amount: res.netIrpef,
             detail: `Gross IRPEF of ${fmt2(res.grossIrpef)} on your taxable income of ${fmt2(res.R)}, reduced by the standard employee credit (${fmt2(res.standardCredit)})${res.additionalCredit > 0 ? ` and the cuneo fiscale credit (${fmt2(res.additionalCredit)})` : ''}.`,
-            formula: 'Progressive: 23% to €28k · 33% to €50k · 43% above'
+            formula: 'Progressive: 23% to €28k · 33% to €50k · 43% above',
+            key: 'irpef'
         },
         {
             color: '#C9836F', name: 'Addizionale Regionale (Lombardia)', amount: res.regionalTax,
             detail: `Regional surtax at ${(res.regionalRate * 100).toFixed(2)}%, the bracket for your taxable income level. Deducted over 11 months.`,
-            formula: `${fmt2(res.R)} × ${(res.regionalRate * 100).toFixed(2)}%`
+            formula: `${fmt2(res.R)} × ${(res.regionalRate * 100).toFixed(2)}%`,
+            key: 'regional'
         },
     ];
 
@@ -302,13 +392,15 @@ function renderLineItems(res) {
         items.push({
             color: '#D9A38C', name: 'Addizionale Comunale (Milan)', amount: res.municipalTax,
             detail: `Flat municipal surtax — your taxable income is above the €23,000 exemption threshold. Deducted over 11 months.`,
-            formula: `${fmt2(res.R)} × 0.8%`
+            formula: `${fmt2(res.R)} × 0.8%`,
+            key: 'municipal'
         });
     } else {
         items.push({
             color: '#D9A38C', name: 'Addizionale Comunale (Milan)', amount: 0,
             detail: `Waived — your taxable income of ${fmt2(res.R)} falls at or below the €23,000 exemption threshold.`,
-            formula: 'Exempt'
+            formula: 'Exempt',
+            key: 'municipal'
         });
     }
 
@@ -319,12 +411,19 @@ function renderLineItems(res) {
         row.innerHTML = `
       <span class="lineitem-dot" style="background:${item.color}"></span>
       <div class="lineitem-body">
-        <div class="lineitem-name">${item.name}</div>
+        <div class="lineitem-name" data-formula-key="${item.key}" tabindex="0" role="button" aria-haspopup="dialog">${item.name}${formulaHintSpan()}</div>
         <div class="lineitem-detail">${item.detail}<br><span class="formula">${item.formula}</span></div>
       </div>
       <span class="lineitem-amount ${isPositive ? 'positive' : ''}">${isPositive ? '+' : '−'}${fmt2(Math.abs(item.amount))}</span>
     `;
         table.appendChild(row);
+    });
+
+    table.querySelectorAll('[data-formula-key]').forEach(el => {
+        el.addEventListener('click', () => openFormulaInfo(el.dataset.formulaKey));
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFormulaInfo(el.dataset.formulaKey); }
+        });
     });
 }
 
@@ -486,4 +585,13 @@ ralInput.addEventListener('keydown', (e) => {
 // Run once on load with default value for a populated first impression
 window.addEventListener('DOMContentLoaded', () => {
     runCalculation();
+});
+
+/* ---- Formula modal wiring ---- */
+document.getElementById('formulaClose').addEventListener('click', closeFormulaInfo);
+document.getElementById('formulaOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'formulaOverlay') closeFormulaInfo();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeFormulaInfo();
 });

@@ -640,6 +640,15 @@ input:focus-visible {
     font-weight: 600;
 }
 
+.erosion-tooltip .tt-tap {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--sage);
+    letter-spacing: 0.01em;
+}
+
 .erosion-segment:hover .erosion-tooltip {
     opacity: 1;
     visibility: visible;
@@ -1056,4 +1065,179 @@ input:focus-visible {
     font-weight: 600;
     font-size: 15px;
     color: var(--ink);
+}
+
+/* ============================================
+   FORMULA INFO — tappable rows + modal
+   ============================================ */
+
+[data-formula-key] {
+    cursor: pointer;
+    position: relative;
+}
+
+.formula-hint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--sage);
+    background: rgba(74, 124, 110, 0.1);
+    color: var(--sage-dark);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1;
+    flex-shrink: 0;
+    vertical-align: middle;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+[data-formula-key]:hover .formula-hint,
+[data-formula-key]:focus-visible .formula-hint {
+    border-color: var(--sage-dark);
+    color: var(--paper);
+    background: var(--sage-dark);
+    transform: scale(1.08);
+}
+
+[data-formula-key]:hover,
+[data-formula-key]:focus-visible {
+    outline: none;
+}
+
+.lineitem-name[data-formula-key]:hover,
+.benefit-name[data-formula-key]:hover {
+    color: var(--sage-dark);
+}
+
+.erosion-segment[data-formula-key] {
+    cursor: pointer;
+}
+
+.formula-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(27, 42, 74, 0.42);
+    backdrop-filter: blur(2px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.formula-overlay.visible {
+    display: flex;
+}
+
+.formula-modal {
+    position: relative;
+    background: var(--paper-raised);
+    border-radius: var(--radius-lg);
+    max-width: 460px;
+    width: 100%;
+    padding: 28px 26px 24px;
+    box-shadow: 0 20px 60px rgba(27, 42, 74, 0.25);
+    animation: formulaIn 0.16s ease;
+}
+
+@keyframes formulaIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.formula-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--graphite);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.formula-close:hover {
+    background: var(--hairline);
+    color: var(--ink);
+}
+
+.formula-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    background: rgba(74, 124, 110, 0.1);
+    border-radius: 100px;
+    padding: 4px 10px;
+    margin-bottom: 12px;
+}
+
+.formula-modal h3 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 14px;
+    padding-right: 20px;
+    line-height: 1.3;
+}
+
+.formula-box {
+    background: var(--ink);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.formula-box-label {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 6px;
+}
+
+.formula-box code {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: #F2EEE4;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.formula-modal p {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+}
+
+@media (max-width: 600px) {
+    .formula-modal {
+        padding: 24px 20px 20px;
+    }
 }
