@@ -311,20 +311,6 @@ function renderLineItems(res) {
         });
     }
 
-    if (res.taxFreeBonus > 0) {
-        items.push({
-            color: 'var(--sage)', name: 'Cuneo Fiscale — Tax-Free Bonus', amount: -res.taxFreeBonus,
-            detail: `Your taxable income is under €20,000, so the wedge relief arrives as a tax-free cash bonus added to your pay, rather than a tax credit.`,
-            formula: `${fmt(res.RAL)} × ${res.R <= 8500 ? '7.1%' : res.R <= 15000 ? '5.3%' : '4.8%'}`
-        });
-    } else if (res.additionalCredit > 0) {
-        items.push({
-            color: 'var(--sage)', name: 'Cuneo Fiscale — Additional Tax Credit', amount: -res.additionalCredit,
-            detail: `Already netted into the IRPEF line above — shown separately to make the relief visible. Reduces Gross IRPEF directly.`,
-            formula: res.R <= 32000 ? 'Flat €1,000 credit' : `€1,000 × ((40,000 − ${Math.round(res.R)}) / 8,000)`
-        });
-    }
-
     items.forEach(item => {
         const isPositive = item.amount < 0;
         const row = document.createElement('div');
