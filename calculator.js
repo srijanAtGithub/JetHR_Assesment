@@ -259,9 +259,6 @@ function renderErosionBar(res) {
         detail: `Your final net annual income${res.taxFreeBonus > 0 ? `, including the tax-free cuneo fiscale bonus of ${fmt(res.taxFreeBonus)}` : ''}.`
     });
 
-    document.getElementById('scaleTop').textContent = fmt(res.RAL);
-    document.getElementById('scaleBottom').textContent = '€0';
-
     segments.forEach(seg => {
         const pct = (seg.amount / res.RAL) * 100;
         const el = document.createElement('div');
