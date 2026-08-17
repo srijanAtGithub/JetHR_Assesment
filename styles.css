@@ -241,9 +241,11 @@ input:focus-visible {
         flex-direction: column;
         align-items: stretch;
     }
+
     .panel-label {
         min-width: unset;
     }
+
     .calc-btn {
         width: 100%;
         height: auto;
@@ -1013,4 +1015,45 @@ input:focus-visible {
     color: var(--graphite-light);
     max-width: 640px;
     line-height: 1.6;
+}
+
+/* Step-by-Step Calculation Block */
+.math-summary {
+    margin-top: 24px;
+    padding: 20px 24px;
+    background: var(--paper);
+    border: 1px dashed var(--hairline-strong);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.math-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px dotted var(--hairline);
+}
+
+.math-row:last-child {
+    border-bottom: none;
+}
+
+.math-row.deduction {
+    color: var(--rust);
+}
+
+.math-row.benefit {
+    color: var(--sage-dark);
+}
+
+.math-row.subtotal {
+    border-top: 2px solid var(--hairline-strong);
+    border-bottom: none;
+    margin-top: 8px;
+    padding-top: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
 }

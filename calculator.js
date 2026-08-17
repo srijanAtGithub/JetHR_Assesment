@@ -139,6 +139,7 @@ function render(res) {
 
     renderErosionBar(res);
     renderLineItems(res);
+    renderMathSummary(res);
     renderBenefits(res);
     renderPayslipStrip(res);
     renderMonthlyCards(res);
@@ -286,7 +287,7 @@ function renderLineItems(res) {
             formula: res.RAL > 122295 ? '€122,295 × 9.19%' : `${fmt(res.RAL)} × 9.19%`
         },
         {
-            color: 'var(--rust)', name: 'IRPEF — National Income Tax (net)', amount: res.netIrpef,
+            color: 'var(--rust)', name: 'IRPEF — National Income Tax (Net)', amount: res.netIrpef,
             detail: `Gross IRPEF of ${fmt2(res.grossIrpef)} on your taxable income of ${fmt2(res.R)}, reduced by the standard employee credit (${fmt2(res.standardCredit)})${res.additionalCredit > 0 ? ` and the cuneo fiscale credit (${fmt2(res.additionalCredit)})` : ''}.`,
             formula: 'Progressive: 23% to €28k · 33% to €50k · 43% above'
         },
@@ -325,6 +326,57 @@ function renderLineItems(res) {
     `;
         table.appendChild(row);
     });
+}
+
+function renderMathSummary(res) {
+    const container = document.getElementById('mathSummary');
+    if (!container) return;
+
+    let html = `
+      <div class="math-row">
+        <span>Gross Salary (RAL)</span>
+        <span>${fmt2(res.RAL)}</span>
+      </div>
+      <div class="math-row deduction">
+        <span>− INPS Social Security</span>
+        <span>−${fmt2(res.inps)}</span>
+      </div>
+      <div class="math-row deduction">
+        <span>− Net IRPEF (Income Tax)</span>
+        <span>−${fmt2(res.netIrpef)}</span>
+      </div>
+      <div class="math-row deduction">
+        <span>− Regional Surtax (Lombardia)</span>
+        <span>−${fmt2(res.regionalTax)}</span>
+      </div>
+    `;
+
+    if (res.municipalTax > 0) {
+        html += `
+      <div class="math-row deduction">
+        <span>− Municipal Surtax (Milan)</span>
+        <span>−${fmt2(res.municipalTax)}</span>
+      </div>
+      `;
+    }
+
+    if (res.taxFreeBonus > 0) {
+        html += `
+      <div class="math-row benefit">
+        <span>+ Cuneo Fiscale Cash Bonus</span>
+        <span>+${fmt2(res.taxFreeBonus)}</span>
+      </div>
+      `;
+    }
+
+    html += `
+      <div class="math-row subtotal">
+        <span>= Net Annual Income</span>
+        <span>${fmt2(res.netAnnual)}</span>
+      </div>
+    `;
+
+    container.innerHTML = html;
 }
 
 function renderPayslipStrip(res) {
