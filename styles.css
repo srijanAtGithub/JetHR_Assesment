@@ -981,6 +981,44 @@ input:focus-visible {
     line-height: 1.55;
 }
 
+.month-card.has-conguaglio {
+    border-color: var(--sage);
+    background: rgba(74, 124, 110, 0.05);
+}
+
+.conguaglio-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px 0 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.conguaglio-line span:first-child {
+    display: inline-flex;
+    align-items: center;
+}
+
+.conguaglio-line.refund {
+    background: rgba(74, 124, 110, 0.12);
+    color: var(--sage-dark);
+}
+
+.conguaglio-line.owed {
+    background: rgba(181, 72, 52, 0.1);
+    color: var(--rust);
+}
+
+.conguaglio-note {
+    padding-top: 4px;
+    border-top: 1px dotted var(--hairline-strong);
+}
+
 /* ---------- Reconciliation ---------- */
 .reconciliation {
     margin-top: 36px;

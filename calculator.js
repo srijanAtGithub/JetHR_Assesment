@@ -56,6 +56,12 @@ const FORMULA_INFO = {
         title: 'Addizionale Comunale (Milan)',
         formula: 'Municipal tax = Taxable income × 0.8%\n(only if taxable income > €23,000; otherwise €0)',
         explain: 'Each municipality can also levy its own surtax on taxable income. Milan applies a flat 0.8% rate, but exempts anyone whose taxable income is at or below €23,000. Like the regional tax, it\'s withheld over 11 installments (Jan–Nov).'
+    },
+    conguaglio: {
+        tag: 'Year-end adjustment',
+        title: 'Conguaglio — December Reconciliation',
+        formula: 'December adjustment = True annual net − Sum of the other 12 payslips\n(the 13th payslip withholds 1/13 of gross IRPEF with no tax credits applied)',
+        explain: 'The 13th payslip (tredicesima) is taxed on its own, with no share of your annual tax credits offsetting it — that\'s standard practice, not an error. But it means spreading credits evenly across 12 months doesn\'t always match what you actually owe for the year. Employers correct this every December: they compare total tax withheld so far against your true annual liability and refund or collect the difference on that payslip, so your 13 payslips always add up exactly to your net annual income.'
     }
 };
 
@@ -174,8 +180,24 @@ function calculate(RAL) {
     const monthlyTaxDeduction = Math.max(0, irpefPerPayslip - creditPerMonth - additionalCreditPerMonth);
 
     const netMonths1to11 = baseNet - monthlyTaxDeduction - regionalPerMonth - municipalPerMonth + bonusPerMonth;
-    const netMonth12 = baseNet - monthlyTaxDeduction + bonusPerMonth;
+
+    // Pre-conguaglio December and 13th payslip figures.
+    // The 13th payslip strips the full 1/13 gross IRPEF with no credit offset —
+    // that's correct per-payslip mechanics, but it means the sum of all 13
+    // payslips won't equal the true annual net whenever monthly withholding
+    // (spread evenly) doesn't match the year's actual, non-linear tax liability
+    // (e.g. credits that fully absorb IRPEF, or the €65 bump mid-year).
+    const netMonth12PreConguaglio = baseNet - monthlyTaxDeduction + bonusPerMonth;
     const netMonth13 = baseNet - irpefPerPayslip;
+
+    const sumOf13PreConguaglio = (netMonths1to11 * 11) + netMonth12PreConguaglio + netMonth13;
+
+    // ---- Step 11: December Conguaglio (year-end reconciliation) ----
+    // Real Italian payroll reconciles withheld tax against actual annual
+    // liability every December. We model that as a single adjustment on the
+    // December payslip, so the 13 payslips always sum exactly to netAnnual.
+    const conguaglioAdjustment = netAnnual - sumOf13PreConguaglio;
+    const netMonth12 = netMonth12PreConguaglio + conguaglioAdjustment;
 
     const sumOf13 = (netMonths1to11 * 11) + netMonth12 + netMonth13;
 
@@ -185,7 +207,8 @@ function calculate(RAL) {
         regionalTax, regionalRate, municipalTax, netAnnual,
         monthlyInps, irpefPerPayslip, creditPerMonth, bonusPerMonth,
         regionalPerMonth, municipalPerMonth,
-        netMonths1to11, netMonth12, netMonth13, sumOf13
+        netMonths1to11, netMonth12, netMonth12PreConguaglio, netMonth13,
+        conguaglioAdjustment, sumOf13
     };
 }
 
@@ -488,15 +511,20 @@ function renderPayslipStrip(res) {
         res.netMonth13
     ];
     const types = [...Array(11).fill('type-standard'), 'type-dec', 'type-thirteenth'];
+    const hasConguaglio = Math.abs(res.conguaglioAdjustment) >= 0.01;
 
     labels.forEach((label, i) => {
         const block = document.createElement('div');
         block.className = `payslip-block ${types[i]}`;
+        const isDec = label === 'Dec';
+        const conguaglioLine = (isDec && hasConguaglio)
+            ? `<br><span class="tt-tap">${res.conguaglioAdjustment > 0 ? '+' : '−'}${fmt2(Math.abs(res.conguaglioAdjustment))} conguaglio</span>`
+            : '';
         block.innerHTML = `
       ${label}
       <div class="erosion-tooltip">
         <span class="tt-title">${label === '13th' ? 'Tredicesima' : label}</span>
-        Net pay: <span class="tt-amount">${fmt2(values[i])}</span>
+        Net pay: <span class="tt-amount">${fmt2(values[i])}</span>${conguaglioLine}
       </div>
     `;
         strip.appendChild(block);
@@ -505,6 +533,17 @@ function renderPayslipStrip(res) {
 
 function renderMonthlyCards(res) {
     const container = document.getElementById('monthlyCards');
+    const hasConguaglio = Math.abs(res.conguaglioAdjustment) >= 0.01;
+    const isRefund = res.conguaglioAdjustment > 0;
+
+    const conguaglioBlock = hasConguaglio ? `
+      <div class="conguaglio-line ${isRefund ? 'refund' : 'owed'} formula-hint-row" data-formula-key="conguaglio" tabindex="0" role="button" aria-haspopup="dialog">
+        <span>${isRefund ? '+ Conguaglio refund' : '− Conguaglio owed'}${formulaHintSpan()}</span>
+        <span>${isRefund ? '+' : '−'}${fmt2(Math.abs(res.conguaglioAdjustment))}</span>
+      </div>
+      <div class="month-card-note conguaglio-note">Year-end reconciliation: the 13th payslip withholds 1/13 of gross IRPEF with no credits applied, which ${isRefund ? "over-withholds" : "under-withholds"} against your true annual tax. December ${isRefund ? 'refunds' : 'collects'} the difference so all 13 payslips add up exactly to your net annual income.</div>
+    ` : '';
+
     container.innerHTML = `
     <div class="month-card">
       <div class="month-card-header">
@@ -514,13 +553,14 @@ function renderMonthlyCards(res) {
       <div class="month-card-value">${fmt2(res.netMonths1to11)}</div>
       <div class="month-card-note">Full local tax installment deducted (1/11), plus 1/12 of your annual tax credit${res.taxFreeBonus > 0 ? ' and cuneo bonus' : ''}.</div>
     </div>
-    <div class="month-card">
+    <div class="month-card${hasConguaglio ? ' has-conguaglio' : ''}">
       <div class="month-card-header">
         <span class="month-card-swatch" style="background:#6B9A8C"></span>
         <span class="month-card-title">Month 12 (December)</span>
       </div>
       <div class="month-card-value">${fmt2(res.netMonth12)}</div>
-      <div class="month-card-note">Regional and municipal installments are already paid off — no local tax this month. Tax credit still applies. (Year-end conguaglio not modeled.)</div>
+      <div class="month-card-note">Regional and municipal installments are already paid off — no local tax this month. Tax credit still applies.</div>
+      ${conguaglioBlock}
     </div>
     <div class="month-card">
       <div class="month-card-header">
@@ -528,15 +568,23 @@ function renderMonthlyCards(res) {
         <span class="month-card-title">13th Payslip (Tredicesima)</span>
       </div>
       <div class="month-card-value">${fmt2(res.netMonth13)}</div>
-      <div class="month-card-note">No tax credits, no cuneo bonus, no local tax — but full marginal IRPEF applies. The most heavily taxed payslip of the year.</div>
+      <div class="month-card-note">No tax credits, no cuneo bonus, no local tax — but full marginal IRPEF applies. The most heavily taxed payslip of the year${hasConguaglio ? ', which is why December corrects for it below.' : '.'}</div>
     </div>
   `;
+
+    container.querySelectorAll('[data-formula-key]').forEach(el => {
+        el.addEventListener('click', () => openFormulaInfo(el.dataset.formulaKey));
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFormulaInfo(el.dataset.formulaKey); }
+        });
+    });
 }
 
 function renderReconciliation(res) {
     const diff = Math.abs(res.netAnnual - res.sumOf13);
+    const hasConguaglio = Math.abs(res.conguaglioAdjustment) >= 0.01;
     document.getElementById('reconciliation').innerHTML = `
-    <span class="recon-label">Net annual (top-down): <strong style="color:var(--ink)">${fmt2(res.netAnnual)}</strong> · Sum of 13 payslips (bottom-up): <strong style="color:var(--ink)">${fmt2(res.sumOf13)}</strong></span>
+    <span class="recon-label">Net annual (top-down): <strong style="color:var(--ink)">${fmt2(res.netAnnual)}</strong> · Sum of 13 payslips (bottom-up): <strong style="color:var(--ink)">${fmt2(res.sumOf13)}</strong>${hasConguaglio ? ` · includes a ${fmt2(Math.abs(res.conguaglioAdjustment))} December conguaglio` : ''}</span>
     <span class="recon-check">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 7L6.2 8.8L9.5 5.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Reconciled — within €${diff.toFixed(2)} (rounding only)
