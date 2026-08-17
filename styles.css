@@ -106,8 +106,8 @@ input:focus-visible {
 }
 
 .brand-mark {
-    width: 36px;
-    height: 36px;
+    width: 45px;
+    height: 45px;
     background: var(--ink);
     color: var(--paper);
     border-radius: var(--radius-sm);
@@ -128,12 +128,12 @@ input:focus-visible {
 
 .brand-name {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 17px;
     color: var(--ink);
 }
 
 .brand-sub {
-    font-size: 11.5px;
+    font-size: 14px;
     color: var(--graphite);
     font-family: var(--font-mono);
     letter-spacing: 0.01em;
@@ -146,7 +146,7 @@ input:focus-visible {
 
 .meta-pill {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 13px;
     padding: 5px 11px;
     border: 1px solid var(--hairline-strong);
     border-radius: 100px;
@@ -169,7 +169,7 @@ input:focus-visible {
 
 .eyebrow {
     font-family: var(--font-mono);
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--sage-dark);
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -258,7 +258,7 @@ input:focus-visible {
 
 .panel-number {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 13px;
     color: var(--sage-dark);
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -372,7 +372,7 @@ input:focus-visible {
 }
 
 .assumptions-intro {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--graphite);
     line-height: 1.6;
     max-width: 620px;
@@ -406,7 +406,7 @@ input:focus-visible {
 
 .assumption-index {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--sage-dark);
     flex-shrink: 0;
@@ -415,7 +415,7 @@ input:focus-visible {
 
 .assumption-text {
     font-family: var(--font-sans);
-    font-size: 13.5px;
+    font-size: 15px;
     color: var(--ink-soft);
     line-height: 1.5;
 }
@@ -504,7 +504,7 @@ input:focus-visible {
 
 .headline-label {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--graphite);
@@ -527,7 +527,7 @@ input:focus-visible {
 }
 
 .headline-sub {
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--graphite);
 }
 
@@ -584,7 +584,7 @@ input:focus-visible {
 
 .erosion-segment .seg-label {
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: 13px;
     color: rgba(255, 255, 255, 0.92);
     white-space: nowrap;
     overflow: hidden;
@@ -697,20 +697,20 @@ input:focus-visible {
 
 .lineitem-name {
     font-weight: 600;
-    font-size: 14.5px;
+    font-size: 15px;
     color: var(--ink);
     margin-bottom: 3px;
 }
 
 .lineitem-detail {
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--graphite);
     line-height: 1.55;
 }
 
 .lineitem-detail .formula {
     font-family: var(--font-mono);
-    font-size: 11.5px;
+    font-size: 13px;
     color: var(--graphite);
     background: var(--paper);
     padding: 1px 6px;
@@ -814,20 +814,20 @@ input:focus-visible {
 
 .benefit-name {
     font-weight: 600;
-    font-size: 14.5px;
+    font-size: 15px;
     color: var(--ink);
     line-height: 1.35;
 }
 
 .benefit-subtitle {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 13px;
     color: var(--graphite-light);
     margin-bottom: 4px;
 }
 
 .benefit-detail {
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--graphite);
     line-height: 1.6;
 }
@@ -849,7 +849,7 @@ input:focus-visible {
 }
 
 .benefits-total-label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--ink);
 }
@@ -895,7 +895,7 @@ input:focus-visible {
     align-items: center;
     justify-content: center;
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--paper);
     cursor: pointer;
@@ -954,7 +954,7 @@ input:focus-visible {
 
 .month-card-title {
     font-weight: 600;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink);
 }
 
@@ -967,7 +967,7 @@ input:focus-visible {
 }
 
 .month-card-note {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--graphite);
     line-height: 1.55;
 }
@@ -986,7 +986,7 @@ input:focus-visible {
 
 .recon-label {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--graphite);
 }
 
@@ -995,7 +995,7 @@ input:focus-visible {
     align-items: center;
     gap: 8px;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--sage-dark);
     font-weight: 500;
 }
