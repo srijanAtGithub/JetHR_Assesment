@@ -62,12 +62,6 @@
                         <span class="currency-sign">€</span>
                         <input type="text" inputmode="numeric" id="ralInput" placeholder="45,000" autocomplete="off">
                     </div>
-                    <input type="range" id="ralSlider" min="18000" max="150000" step="500" value="45000"
-                        class="ral-slider">
-                    <div class="slider-ticks">
-                        <span>€18k</span>
-                        <span>€150k</span>
-                    </div>
 
                     <button id="calculateBtn" class="calc-btn">
                         <span>Calculate net salary</span>
@@ -77,25 +71,6 @@
                         </svg>
                     </button>
 
-                    <div class="assumptions-box">
-                        <button class="assumptions-toggle" id="assumptionsToggle">
-                            <span>Assumptions used in this model</span>
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="chevron">
-                                <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.3"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </button>
-                        <ul class="assumptions-list" id="assumptionsList">
-                            <li>Permanent, full-time employee — corporate / tech sector</li>
-                            <li>Entered the workforce after 1996 (INPS contributive cap applies)</li>
-                            <li>Resident and working in Milan, Lombardia</li>
-                            <li>Paid over 13 monthly installments (no 14th — standard for tech)</li>
-                            <li>No CCNL — so no supplementary health fund deduction</li>
-                            <li>Full 365-day tax year, no special exemptions or bonuses</li>
-                            <li>Not first year of Italian residency (regional tax applies)</li>
-                            <li>December figures exclude year-end conguaglio adjustment</li>
-                        </ul>
-                    </div>
                 </div>
 
                 <!-- OUTPUT PANEL -->
@@ -168,6 +143,36 @@
                     </div>
                 </div>
 
+            </div>
+        </section>
+
+        <!-- ASSUMPTIONS -->
+        <section class="assumptions-section">
+            <div class="assumptions-inner">
+                <div class="panel-label">
+                    <span class="panel-number">Model basis</span>
+                    <h2>Assumptions used in this model</h2>
+                    <p class="assumptions-intro">This calculator simplifies Italy's payroll rules to a single
+                        standard case. The figures above only hold under the following conditions.</p>
+                </div>
+                <ol class="assumptions-grid">
+                    <li><span class="assumption-index">01</span><span class="assumption-text">Permanent, full-time
+                            employee — corporate / tech sector</span></li>
+                    <li><span class="assumption-index">02</span><span class="assumption-text">Entered the workforce
+                            after 1996 (INPS contributive cap applies)</span></li>
+                    <li><span class="assumption-index">03</span><span class="assumption-text">Resident and working in
+                            Milan, Lombardia</span></li>
+                    <li><span class="assumption-index">04</span><span class="assumption-text">Paid over 13 monthly
+                            installments (no 14th — standard for tech)</span></li>
+                    <li><span class="assumption-index">05</span><span class="assumption-text">No CCNL — so no
+                            supplementary health fund deduction</span></li>
+                    <li><span class="assumption-index">06</span><span class="assumption-text">Full 365-day tax year,
+                            no special exemptions or bonuses</span></li>
+                    <li><span class="assumption-index">07</span><span class="assumption-text">Not first year of
+                            Italian residency (regional tax applies)</span></li>
+                    <li><span class="assumption-index">08</span><span class="assumption-text">December figures
+                            exclude year-end conguaglio adjustment</span></li>
+                </ol>
             </div>
         </section>
 

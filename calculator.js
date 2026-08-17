@@ -337,10 +337,7 @@ function renderReconciliation(res) {
    ============================================ */
 
 const ralInput = document.getElementById('ralInput');
-const ralSlider = document.getElementById('ralSlider');
 const calculateBtn = document.getElementById('calculateBtn');
-const assumptionsToggle = document.getElementById('assumptionsToggle');
-const assumptionsList = document.getElementById('assumptionsList');
 
 function parseRAL() {
     const raw = ralInput.value.replace(/[^\d]/g, '');
@@ -356,11 +353,6 @@ ralInput.value = '45,000';
 ralInput.addEventListener('input', () => {
     const val = parseRAL();
     ralInput.value = formatInputValue(val);
-    if (val >= 18000 && val <= 150000) ralSlider.value = val;
-});
-
-ralSlider.addEventListener('input', () => {
-    ralInput.value = formatInputValue(ralSlider.value);
 });
 
 function runCalculation() {
@@ -376,11 +368,6 @@ function runCalculation() {
 calculateBtn.addEventListener('click', runCalculation);
 ralInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') runCalculation();
-});
-
-assumptionsToggle.addEventListener('click', () => {
-    assumptionsToggle.classList.toggle('open');
-    assumptionsList.classList.toggle('open');
 });
 
 // Run once on load with default value for a populated first impression
