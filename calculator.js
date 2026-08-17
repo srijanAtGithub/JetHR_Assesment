@@ -73,7 +73,7 @@ function calculate(RAL) {
     }
 
     // ---- Step 7: Net IRPEF ----
-    let netIrpef = grossIrpef - standardCredit - additionalCredit;
+    let netIrpef = Math.max(0, grossIrpef - standardCredit - additionalCredit);
     if (netIrpef < 0) netIrpef = 0;
 
     // ---- Step 8: Regional Tax (Lombardia) ----
@@ -101,8 +101,11 @@ function calculate(RAL) {
 
     const baseNet = monthlyGross - monthlyInps;
 
-    const netMonths1to11 = baseNet - (irpefPerPayslip - creditPerMonth - additionalCreditPerMonth) - regionalPerMonth - municipalPerMonth + bonusPerMonth;
-    const netMonth12 = baseNet - (irpefPerPayslip - creditPerMonth - additionalCreditPerMonth) + bonusPerMonth;
+    // Calculate the monthly tax deduction first, capped at a minimum of €0
+    const monthlyTaxDeduction = Math.max(0, irpefPerPayslip - creditPerMonth - additionalCreditPerMonth);
+
+    const netMonths1to11 = baseNet - monthlyTaxDeduction - regionalPerMonth - municipalPerMonth + bonusPerMonth;
+    const netMonth12 = baseNet - monthlyTaxDeduction + bonusPerMonth;
     const netMonth13 = baseNet - irpefPerPayslip;
 
     const sumOf13 = (netMonths1to11 * 11) + netMonth12 + netMonth13;
